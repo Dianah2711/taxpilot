@@ -1,6 +1,6 @@
 """
 app.py
-Flask backend for Taxation. Owns the tax engine, relief catalogue and chat,
+Flask backend for TaxPilot. Owns the tax engine, relief catalogue and chat,
 and serves the single-page frontend.
 
 Run:

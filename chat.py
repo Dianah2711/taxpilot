@@ -1,7 +1,7 @@
 """
 chat.py
 Grounded tax Q&A. Default is a deterministic rule-based responder so the app
-works offline with zero API keys. If you set TAXATION_LLM=1 and provide an
+works offline with zero API keys. If you set TAXPILOT_LLM=1 and provide an
 ANTHROPIC_API_KEY (or wire your own GLM client in call_llm), it will defer to
 that instead. Either way, answers are kept close to ITA 1967 / LHDN rulings.
 """
@@ -107,12 +107,12 @@ def call_llm(question: str, lang: str):
     Plug in your own GLM/ILMU client here, or use Anthropic if a key is set.
     Kept disabled by default so the app runs with no external dependency.
     """
-    if os.getenv("TAXATION_LLM") != "1":
+    if os.getenv("TAXPILOT_LLM") != "1":
         return None
     try:
         import anthropic  # only imported if you opt in
         client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-        system = ("You are Taxation, a Malaysian tax copilot. Answer strictly from the "
+        system = ("You are TaxPilot, a Malaysian tax copilot. Answer strictly from the "
                   "Income Tax Act 1967 and LHDN Public Rulings for YA 2025. Be concise, "
                   "cite the exact section, and never invent figures. "
                   + ("Reply in Bahasa Malaysia." if lang == "bm" else "Reply in English."))

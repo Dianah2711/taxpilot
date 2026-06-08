@@ -1,6 +1,6 @@
-# Taxation — Malaysia AI Tax Relief Finder
+# TaxPilot — Malaysia AI Tax Relief Finder
 
-> Stop leaving money on the table. Taxation finds every ringgit you're owed, with LHDN citations.
+> Stop leaving money on the table. TaxPilot finds every ringgit you're owed, with LHDN citations.
 
 Full-stack rebuild of the SmarTax demo: a **Flask backend** owns the tax engine,
 relief catalogue and chat (so the logic is server-side and authoritative), and a
@@ -68,7 +68,7 @@ Chat is rule-based by default so it runs with no keys. To use a real model, wire
 GLM/ILMU client in `chat.py:call_llm`, or use Anthropic:
 
 ```bash
-export TAXATION_LLM=1
+export TAXPILOT_LLM=1
 export ANTHROPIC_API_KEY=sk-...
 pip install anthropic
 ```

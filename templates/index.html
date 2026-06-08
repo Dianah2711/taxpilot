@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Taxation — Malaysia Tax Copilot</title>
+  <title>TaxPilot — Malaysia Tax Copilot</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -108,7 +108,7 @@ const DICT = {
   landing_eyebrow:   { en: 'YA 2025 · for filing in 2026',      bm: 'TT 2025 · untuk pemfailan 2026' },
   landing_title_a:   { en: 'File smarter.',                      bm: 'Fail lebih bijak.' },
   landing_title_b:   { en: 'Save what\u2019s rightfully yours.',  bm: 'Jimat apa yang hak anda.' },
-  landing_sub:       { en: 'Taxation reads your EA or P&L, walks you through every LHDN relief you qualify for, and tells you exactly what to do before 31 December — with citations.', bm: 'Taxation membaca borang EA atau P&L anda, memandu anda melalui setiap pelepasan LHDN yang anda layak, dan memberitahu apa perlu dilakukan sebelum 31 Disember — dengan petikan rujukan.' },
+  landing_sub:       { en: 'TaxPilot reads your EA or P&L, walks you through every LHDN relief you qualify for, and tells you exactly what to do before 31 December — with citations.', bm: 'TaxPilot membaca borang EA atau P&L anda, memandu anda melalui setiap pelepasan LHDN yang anda layak, dan memberitahu apa perlu dilakukan sebelum 31 Disember — dengan petikan rujukan.' },
   landing_cta:       { en: 'Get started',      bm: 'Mula sekarang' },
   landing_cta_sub:   { en: 'Takes ~4 minutes · No login',        bm: 'Lebih kurang 4 minit · Tanpa log masuk' },
   landing_stat_1:    { en: 'avg. overlooked reliefs',            bm: 'purata pelepasan terlepas' },
@@ -199,13 +199,13 @@ const DICT = {
   act_why:          { en: 'Why this works',                   bm: 'Kenapa ini berkesan' },
   act_add:          { en: 'Add to plan',                      bm: 'Tambah ke pelan' },
   act_added:        { en: 'Added',                             bm: 'Ditambah' },
-  act_next:         { en: 'Ask Taxation a question',         bm: 'Tanya Taxation soalan' },
+  act_next:         { en: 'Ask TaxPilot a question',         bm: 'Tanya TaxPilot soalan' },
 
-  chat_title:       { en: 'Ask Taxation',                     bm: 'Tanya Taxation' },
+  chat_title:       { en: 'Ask TaxPilot',                     bm: 'Tanya TaxPilot' },
   chat_sub:         { en: 'Grounded in the Income Tax Act 1967 and LHDN Public Rulings.', bm: 'Berasaskan Akta Cukai Pendapatan 1967 dan Ketetapan Umum LHDN.' },
   chat_placeholder: { en: 'Ask anything — e.g. \u201cCan I claim my laptop under lifestyle?\u201d', bm: 'Tanya apa sahaja — cth. "Boleh saya tuntut laptop di bawah gaya hidup?"' },
   chat_send:        { en: 'Send',                              bm: 'Hantar' },
-  chat_thinking:    { en: 'Taxation is checking LHDN rulings',  bm: 'Taxation sedang menyemak ketetapan LHDN' },
+  chat_thinking:    { en: 'TaxPilot is checking LHDN rulings',  bm: 'TaxPilot sedang menyemak ketetapan LHDN' },
   chat_disclaimer:  { en: 'Demo responses. Not a substitute for a licensed tax agent.', bm: 'Respons demo. Bukan pengganti ejen cukai berlesen.' },
   chat_suggest_1:   { en: 'What reliefs can I double-up with my spouse?', bm: 'Pelepasan apa boleh digabung dengan pasangan?' },
   chat_suggest_2:   { en: 'Is a MacBook claimable this year?', bm: 'Bolehkah MacBook dituntut tahun ini?' },
@@ -332,7 +332,7 @@ function Navbar({ lang, onLang, mode, onMode, onBack, onRestart, canBack, t, ste
         <button onClick={onRestart} className="flex items-center gap-2.5 group">
           <Logo className="w-8 h-8" />
           <div className="leading-tight">
-            <div className="font-semibold tracking-tight text-[15px]">Taxation</div>
+            <div className="font-semibold tracking-tight text-[15px]">TaxPilot</div>
             <div className="text-[10.5px] text-ink-3 tracking-wider uppercase font-mono">YA 2025 · LHDN</div>
           </div>
         </button>
@@ -831,7 +831,7 @@ function PageAction({ t, lang, actions, onNext }) {
 
 // ===== PageChat.jsx — calls /api/chat =====
 function PageChat({ t, lang }) {
-  const [msgs, setMsgs] = React.useState([{ role: 'assistant', text: lang === 'bm' ? 'Hai! Saya Taxation. Tanya apa sahaja tentang pelepasan atau cukai anda — saya akan petik rujukan LHDN.' : 'Hi! I\u2019m Taxation. Ask me anything about your reliefs or tax bill — I\u2019ll cite LHDN sources.', cites: [] }]);
+  const [msgs, setMsgs] = React.useState([{ role: 'assistant', text: lang === 'bm' ? 'Hai! Saya TaxPilot. Tanya apa sahaja tentang pelepasan atau cukai anda — saya akan petik rujukan LHDN.' : 'Hi! I\u2019m TaxPilot. Ask me anything about your reliefs or tax bill — I\u2019ll cite LHDN sources.', cites: [] }]);
   const [input, setInput] = React.useState('');
   const [thinking, setThinking] = React.useState(false);
   const scrollRef = React.useRef(null);
@@ -935,7 +935,7 @@ function App() {
 
       <footer className="border-t border-line bg-paper-2/50">
         <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5"><Logo className="w-6 h-6 opacity-70" /><div className="text-[12.5px] text-ink-3 font-mono">Taxation · YA 2025 demo · not legal advice</div></div>
+          <div className="flex items-center gap-2.5"><Logo className="w-6 h-6 opacity-70" /><div className="text-[12.5px] text-ink-3 font-mono">TaxPilot · YA 2025 demo · not legal advice</div></div>
           <div className="flex items-center gap-3 text-[12px] text-ink-3 font-mono"><span>Bands: ITA 1967 Sch. 1</span><span>·</span><span>Reliefs: YA 2025</span><span>·</span><span>Flask backend</span></div>
         </div>
       </footer>
