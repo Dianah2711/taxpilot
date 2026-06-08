@@ -580,16 +580,33 @@ function PageWizard({ t, onDone }) {
   const [idx, setIdx] = React.useState(0);
   const [answers, setAnswers] = React.useState({});
   const [dir, setDir] = React.useState(1);
+  const [zakatAmt, setZakatAmt] = React.useState('');
+  const [awaitZakat, setAwaitZakat] = React.useState(false);
   const total = QUESTIONS.length;
   const q = QUESTIONS[idx];
   const current = answers[q.id];
 
-  const answer = (val) => {
-    const next = { ...answers, [q.id]: val };
-    setAnswers(next); setDir(1);
+  const advance = (next) => {
+    setDir(1);
     setTimeout(() => { if (idx < total - 1) setIdx(idx + 1); else onDone(next); }, 260);
   };
-  const back = () => { if (idx > 0) { setDir(-1); setIdx(idx - 1); } };
+  const answer = (val) => {
+    if (q.id === 'zakat' && val === 'yes') {
+      setAnswers(prev => ({ ...prev, zakat: 'yes' }));
+      setAwaitZakat(true);
+      return;
+    }
+    const next = { ...answers, [q.id]: val };
+    setAnswers(next);
+    advance(next);
+  };
+  const confirmZakat = () => {
+    const next = { ...answers, zakat: 'yes', zakatAmount: parseFloat(zakatAmt) || 0 };
+    setAnswers(next);
+    setAwaitZakat(false);
+    advance(next);
+  };
+  const back = () => { if (idx > 0) { setAwaitZakat(false); setDir(-1); setIdx(idx - 1); } };
 
   return (
     <main className="max-w-[900px] mx-auto px-5 md:px-8 pt-14 pb-24">
@@ -614,16 +631,26 @@ function PageWizard({ t, onDone }) {
             <div className="mt-4 text-[13.5px] text-ink-3 italic">{t(q.hint)}</div>
           </div>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-3">
-          {[{ v: 'yes', label: t('wiz_yes') }, { v: 'no', label: t('wiz_no') }].map(opt => (
-            <button key={opt.v} onClick={() => answer(opt.v)} className={`group relative rounded-2xl border px-6 py-5 text-left transition-all active:scale-[0.99] ${current === opt.v ? 'border-teal-brand bg-teal-50b' : 'border-line bg-white hover:border-ink-3 hover:bg-paper-2'}`}>
-              <div className="flex items-center justify-between">
-                <span className="font-display text-2xl tracking-tight">{opt.label}</span>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${current === opt.v ? 'bg-teal-brand text-white' : 'border border-line text-ink-3 group-hover:border-ink-2'}`}><Icon name={opt.v === 'yes' ? 'check' : 'close'} className="w-4 h-4" /></div>
-              </div>
-            </button>
-          ))}
-        </div>
+        {awaitZakat ? (
+          <div className="mt-10">
+            <label className="block text-[13.5px] text-ink-3 mb-2">How much zakat / fitrah did you pay this year? (RM)</label>
+            <input type="number" min="0" value={zakatAmt} onChange={e => setZakatAmt(e.target.value)}
+              placeholder="e.g. 1200"
+              className="w-full rounded-xl border border-line bg-paper-2 px-4 py-3 font-mono text-lg focus:outline-none focus:border-teal-brand" />
+            <Button className="mt-4 w-full" onClick={confirmZakat}>Confirm →</Button>
+          </div>
+        ) : (
+          <div className="mt-10 grid grid-cols-2 gap-3">
+            {[{ v: 'yes', label: t('wiz_yes') }, { v: 'no', label: t('wiz_no') }].map(opt => (
+              <button key={opt.v} onClick={() => answer(opt.v)} className={`group relative rounded-2xl border px-6 py-5 text-left transition-all active:scale-[0.99] ${current === opt.v ? 'border-teal-brand bg-teal-50b' : 'border-line bg-white hover:border-ink-3 hover:bg-paper-2'}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-2xl tracking-tight">{opt.label}</span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${current === opt.v ? 'bg-teal-brand text-white' : 'border border-line text-ink-3 group-hover:border-ink-2'}`}><Icon name={opt.v === 'yes' ? 'check' : 'close'} className="w-4 h-4" /></div>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
         <div className="mt-6 flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={back} disabled={idx === 0}><Icon name="arrowLeft" className="w-4 h-4" /> {t('wiz_back')}</Button>
           <button onClick={() => answer('skip')} className="text-[13px] text-ink-3 hover:text-ink-2 transition-colors">{t('wiz_skip')} →</button>
@@ -660,7 +687,7 @@ function PageResults({ t, lang, calc, onNext }) {
   const steps = [
     { label: t('res_gross'),       value: calc.gross,        tone: 'start' },
     { label: t('res_ded_stat'),    value: -calc.statutory,   tone: 'minus' },
-    { label: t('res_ded_reliefs'), value: -calc.reliefTotal, tone: 'minus' },
+    { label: t('res_ded_reliefs'), value: -(calc.reliefTotal - calc.statutory), tone: 'minus' },
     { label: t('res_chargeable'),  value: calc.chargeable,   tone: 'sub' },
     { label: t('res_tax'),         value: calc.tax,          tone: 'tax' },
     { label: t('res_rebates'),     value: -calc.rebate,      tone: 'minus' },

@@ -34,7 +34,7 @@ def compute_rebate(answers: dict, chargeable: float) -> float:
     if chargeable <= 35000:
         rebate += 400
     if answers.get("zakat") == "yes":
-        rebate += 1800  # demo assumed zakat paid
+        rebate += float(answers.get("zakatAmount") or 0)
     return rebate
 
 
@@ -85,7 +85,7 @@ def build_actions(extracted: dict, answers: dict, calc: dict):
                     "bm": f"Sumbangan PRS boleh ditolak sehingga RM 3,000 di bawah s.49(1D). Pada band anda setiap ringgit mengurangkan kira-kira {pct}% cukai."},
             "cite": "ITA 1967 s.49(1D)",
         })
-    if answers.get("sspn") != "yes":
+    if answers.get("sspn") != "yes" and answers.get("kids") == "yes":
         items.append({
             "id": "sspn", "spend": 8000, "save": round(8000 * rate),
             "title": {"en": "Open an SSPN-i and deposit RM 8,000", "bm": "Buka SSPN-i & deposit RM 8,000"},
