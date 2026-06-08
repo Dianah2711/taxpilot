@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taxation — Malaysia Tax Copilot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal-50:  oklch(0.975 0.02 195);
+      --teal-100: oklch(0.94 0.04 195);
+      --teal-200: oklch(0.88 0.07 195);
+      --teal-400: oklch(0.74 0.12 195);
+      --teal-500: oklch(0.66 0.13 195);
+      --teal-600: oklch(0.58 0.13 195);
+      --teal-700: oklch(0.48 0.11 195);
+      --teal-900: oklch(0.28 0.06 205);
+      --ink:      oklch(0.18 0.015 230);
+      --ink-2:    oklch(0.38 0.015 230);
+      --ink-3:    oklch(0.58 0.012 230);
+      --paper:    oklch(0.995 0.003 180);
+      --paper-2:  oklch(0.975 0.005 190);
+      --line:     oklch(0.92 0.008 200);
+    }
+    html, body { background: var(--paper); color: var(--ink); font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    .font-display { font-family: 'Fraunces', 'Times New Roman', serif; font-optical-sizing: auto; letter-spacing: -0.02em; }
+    .font-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+    .tabular { font-variant-numeric: tabular-nums; }
+
+    .btn-primary { background: var(--teal-600); color: white; }
+    .btn-primary:hover { background: var(--teal-700); }
+    .chip-citation { background: var(--teal-50); color: var(--teal-700); border: 1px solid var(--teal-200); }
+    .chip-citation:hover { background: var(--teal-100); }
+
+    .card-soft { background: white; border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(15,42,60,0.04), 0 8px 24px -12px rgba(15,42,60,0.08); }
+
+    .grid-bg {
+      background-image:
+        linear-gradient(to right, oklch(0.92 0.008 200 / 0.55) 1px, transparent 1px),
+        linear-gradient(to bottom, oklch(0.92 0.008 200 / 0.55) 1px, transparent 1px);
+      background-size: 48px 48px; background-position: -1px -1px;
+    }
+
+    .fade-in { animation: fadeIn .35s ease-out both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .slide-in { animation: slideIn .4s cubic-bezier(.2,.7,.2,1) both; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+    .pulse-ring { position: absolute; inset: 0; border-radius: 9999px; box-shadow: 0 0 0 0 oklch(0.66 0.13 195 / 0.35); animation: ring 1.8s cubic-bezier(.2,.7,.2,1) infinite; }
+    @keyframes ring { 0% { box-shadow: 0 0 0 0 oklch(0.66 0.13 195 / 0.35); } 100% { box-shadow: 0 0 0 24px oklch(0.66 0.13 195 / 0); } }
+
+    .scroll-area::-webkit-scrollbar { width: 10px; height: 10px; }
+    .scroll-area::-webkit-scrollbar-thumb { background: oklch(0.88 0.01 200); border-radius: 6px; }
+
+    .text-ink { color: var(--ink); } .text-ink-2 { color: var(--ink-2); } .text-ink-3 { color: var(--ink-3); }
+    .bg-ink { background: var(--ink); } .bg-ink-2 { background: var(--ink-2); } .bg-ink-3 { background: var(--ink-3); }
+    .bg-paper { background: var(--paper); } .bg-paper-2 { background: var(--paper-2); }
+    .border-line { border-color: var(--line); }
+    .text-teal-brand { color: var(--teal-600); } .bg-teal-brand { background: var(--teal-600); }
+    .bg-teal-50b { background: var(--teal-50); } .bg-teal-100b { background: var(--teal-100); } .bg-teal-900b { background: var(--teal-900); }
+    .border-teal-200b { border-color: var(--teal-200); } .text-teal-700b { color: var(--teal-700); } .ring-teal-200b { --tw-ring-color: var(--teal-200); }
+
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <script type="text/babel" data-presets="react">
+
+// ===== api.jsx — talk to the Flask backend =====
+const API = {
+  async get(path) {
+    const r = await fetch(path);
+    if (!r.ok) throw new Error('GET ' + path + ' -> ' + r.status);
+    return r.json();
+  },
+  async post(path, body) {
+    const r = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {}),
+    });
+    if (!r.ok) throw new Error('POST ' + path + ' -> ' + r.status);
+    return r.json();
+  },
+};
+window.API = API;
+
+// ===== i18n.jsx — bilingual string table =====
+const DICT = {
+  nav_mode_individual: { en: 'Individual', bm: 'Individu' },
+  nav_mode_sme:        { en: 'SME',        bm: 'PKS' },
+  nav_mode_freelancer: { en: 'Freelancer', bm: 'Pekerja Bebas' },
+  nav_back:            { en: 'Back',       bm: 'Kembali' },
+  nav_restart:         { en: 'Start over', bm: 'Mula semula' },
+
+  landing_eyebrow:   { en: 'YA 2025 · for filing in 2026',      bm: 'TT 2025 · untuk pemfailan 2026' },
+  landing_title_a:   { en: 'File smarter.',                      bm: 'Fail lebih bijak.' },
+  landing_title_b:   { en: 'Save what\u2019s rightfully yours.',  bm: 'Jimat apa yang hak anda.' },
+  landing_sub:       { en: 'Taxation reads your EA or P&L, walks you through every LHDN relief you qualify for, and tells you exactly what to do before 31 December — with citations.', bm: 'Taxation membaca borang EA atau P&L anda, memandu anda melalui setiap pelepasan LHDN yang anda layak, dan memberitahu apa perlu dilakukan sebelum 31 Disember — dengan petikan rujukan.' },
+  landing_cta:       { en: 'Get started',      bm: 'Mula sekarang' },
+  landing_cta_sub:   { en: 'Takes ~4 minutes · No login',        bm: 'Lebih kurang 4 minit · Tanpa log masuk' },
+  landing_stat_1:    { en: 'avg. overlooked reliefs',            bm: 'purata pelepasan terlepas' },
+  landing_stat_2:    { en: 'of filers miss at least one',        bm: 'pemfail terlepas sekurangnya satu' },
+  landing_stat_3:    { en: 'LHDN reliefs mapped',                bm: 'pelepasan LHDN dipetakan' },
+
+  mode_title:        { en: 'Who is filing?',          bm: 'Siapa yang memfailkan?' },
+  mode_sub:          { en: 'Choose a profile. You can switch later — the reliefs and forms we surface will adjust.', bm: 'Pilih profil. Anda boleh tukar kemudian — pelepasan dan borang akan disesuaikan.' },
+  mode_ind_name:     { en: 'Individual',             bm: 'Individu' },
+  mode_ind_desc:     { en: 'Salaried employee with an EA form. Form BE.',      bm: 'Pekerja bergaji dengan borang EA. Borang BE.' },
+  mode_sme_name:     { en: 'SME / Sdn Bhd',          bm: 'PKS / Sdn Bhd' },
+  mode_sme_desc:     { en: 'Private limited company with a Profit & Loss statement. Form C.', bm: 'Syarikat Sdn Bhd dengan penyata untung rugi. Borang C.' },
+  mode_free_name:    { en: 'Freelancer',             bm: 'Pekerja Bebas' },
+  mode_free_desc:    { en: 'Self-employed with mixed income sources. Form B.',  bm: 'Bekerja sendiri dengan pelbagai sumber pendapatan. Borang B.' },
+  mode_select:       { en: 'Select',                  bm: 'Pilih' },
+
+  upload_title:      { en: 'Upload your form',                    bm: 'Muat naik borang anda' },
+  upload_sub_ind:    { en: 'Drop your EA form (PDF). We read gross income, EPF, SOCSO and monthly PCB — no data leaves your browser in this demo.', bm: 'Letak borang EA anda (PDF). Kami baca pendapatan kasar, KWSP, PERKESO dan PCB bulanan.' },
+  upload_sub_sme:    { en: 'Drop your P&L statement. We extract revenue, allowable expenses and capital allowances.', bm: 'Letak penyata P&L. Kami ekstrak hasil, perbelanjaan dan elaun modal.' },
+  upload_sub_free:   { en: 'Drop invoices or your bookkeeping export. We\u2019ll tally gross income and deductibles.', bm: 'Letak invois atau eksport perakaunan. Kami akan kira pendapatan kasar dan potongan.' },
+  upload_cta:        { en: 'Drop file or browse',                bm: 'Letak fail atau layari' },
+  upload_cta_sub:    { en: 'PDF · PNG · JPG — up to 10 MB',       bm: 'PDF · PNG · JPG — sehingga 10 MB' },
+  upload_sample:     { en: 'Use sample data instead',            bm: 'Guna data sampel' },
+  upload_reading:    { en: 'Reading your form',                   bm: 'Membaca borang anda' },
+  upload_step_1:     { en: 'Detecting layout',                    bm: 'Mengesan susun atur' },
+  upload_step_2:     { en: 'Extracting fields',                   bm: 'Mengekstrak medan' },
+  upload_step_3:     { en: 'Cross-checking against LHDN schema', bm: 'Menyemak dengan skema LHDN' },
+  upload_confirm:    { en: 'Confirm extracted figures',           bm: 'Sahkan angka yang diekstrak' },
+  upload_confirm_sub:{ en: 'Edit anything that looks off — everything downstream uses these numbers.', bm: 'Edit mana yang tidak tepat — semua pengiraan seterusnya guna nombor ini.' },
+  upload_continue:   { en: 'Looks right — continue',              bm: 'Nampak betul — teruskan' },
+
+  f_gross:       { en: 'Gross annual income',    bm: 'Pendapatan kasar tahunan' },
+  f_epf:         { en: 'EPF contribution',        bm: 'Caruman KWSP' },
+  f_socso:       { en: 'SOCSO / EIS',              bm: 'PERKESO / SIP' },
+  f_pcb:         { en: 'PCB withheld (monthly)',  bm: 'PCB dipotong (bulanan)' },
+  f_pcb_total:   { en: 'PCB withheld (annual)',   bm: 'PCB dipotong (tahunan)' },
+  f_bonus:       { en: 'Bonus & allowances',      bm: 'Bonus & elaun' },
+
+  wiz_title:        { en: 'Eight quick questions',    bm: 'Lapan soalan pantas' },
+  wiz_sub:          { en: 'Yes or no — takes under a minute.', bm: 'Ya atau tidak — kurang seminit.' },
+  wiz_progress:     { en: 'Question',                  bm: 'Soalan' },
+  wiz_of:           { en: 'of',                         bm: 'dari' },
+  wiz_yes:          { en: 'Yes',                        bm: 'Ya' },
+  wiz_no:           { en: 'No',                         bm: 'Tidak' },
+  wiz_skip:         { en: 'Not sure',                    bm: 'Tidak pasti' },
+  wiz_q_married:    { en: 'Are you married and filing a joint assessment, or is your spouse unemployed?', bm: 'Adakah anda berkahwin dan memfailkan taksiran bersama, atau pasangan tidak bekerja?' },
+  wiz_q_kids:       { en: 'Do you have children under 18 (or still in full-time study)?', bm: 'Adakah anda mempunyai anak bawah 18 (atau masih belajar sepenuh masa)?' },
+  wiz_q_parents:    { en: 'Did you pay medical bills for your parents this year?', bm: 'Adakah anda membayar bil perubatan ibu bapa tahun ini?' },
+  wiz_q_sspn:       { en: 'Did you deposit into an SSPN (Simpan SSPN) account for your child?', bm: 'Adakah anda menyimpan ke akaun SSPN untuk anak?' },
+  wiz_q_lifestyle:  { en: 'Did you buy books, a laptop, sports gear, or an internet subscription?', bm: 'Adakah anda membeli buku, komputer riba, peralatan sukan, atau langganan internet?' },
+  wiz_q_insurance:  { en: 'Do you pay for life or medical insurance premiums?', bm: 'Adakah anda membayar premium insurans hayat atau perubatan?' },
+  wiz_q_prs:        { en: 'Did you contribute to a Private Retirement Scheme (PRS)?', bm: 'Adakah anda menyumbang ke Skim Persaraan Swasta (PRS)?' },
+  wiz_q_zakat:      { en: 'Did you pay zakat or fitrah this year?', bm: 'Adakah anda membayar zakat atau fitrah tahun ini?' },
+  wiz_hint_married: { en: 'A non-working spouse gives you a flat RM 4,000 relief.', bm: 'Pasangan tidak bekerja = pelepasan tetap RM 4,000.' },
+  wiz_hint_kids:    { en: 'RM 2,000 per child; RM 8,000 if in tertiary education.', bm: 'RM 2,000 setiap anak; RM 8,000 jika pengajian tinggi.' },
+  wiz_hint_parents: { en: 'Up to RM 8,000 combined for both parents.', bm: 'Sehingga RM 8,000 untuk kedua ibu bapa.' },
+  wiz_hint_sspn:    { en: 'Up to RM 8,000 relief on net deposits.', bm: 'Pelepasan sehingga RM 8,000 atas deposit bersih.' },
+  wiz_hint_lifestyle:{ en: 'Up to RM 2,500 for lifestyle + RM 1,000 for sports.', bm: 'Sehingga RM 2,500 gaya hidup + RM 1,000 sukan.' },
+  wiz_hint_insurance:{ en: 'RM 3,000 for life (non-EPF) + RM 4,000 for medical (YA 2025).', bm: 'RM 3,000 hayat (bukan KWSP) + RM 4,000 perubatan (TT 2025).' },
+  wiz_hint_prs:     { en: 'Up to RM 3,000 extra retirement relief.', bm: 'Sehingga RM 3,000 pelepasan persaraan tambahan.' },
+  wiz_hint_zakat:   { en: 'Zakat is a rebate, not a relief — it reduces tax dollar-for-dollar.', bm: 'Zakat adalah rebat — mengurangkan cukai ringgit demi ringgit.' },
+  wiz_back:         { en: 'Previous',                    bm: 'Sebelum' },
+  wiz_finish:       { en: 'Calculate my tax',             bm: 'Kira cukai saya' },
+  wiz_calculating:  { en: 'Computing your assessment',    bm: 'Mengira taksiran anda' },
+
+  res_eyebrow:      { en: 'Your 2025 assessment',        bm: 'Taksiran 2025 anda' },
+  res_you_save:     { en: 'You could save',                bm: 'Anda boleh jimat' },
+  res_vs_default:   { en: 'vs. filing with just the default RM 9,000 personal relief', bm: 'berbanding memfail dengan hanya pelepasan peribadi RM 9,000' },
+  res_reliefs_found:{ en: 'Reliefs we found',             bm: 'Pelepasan dijumpai' },
+  res_waterfall:    { en: 'How we got there',             bm: 'Pengiraan penuh' },
+  res_newly:        { en: 'Newly discovered',              bm: 'Baru dijumpai' },
+  res_already:      { en: 'Already claimed',               bm: 'Telah dituntut' },
+  res_next:         { en: 'See action plan',               bm: 'Lihat pelan tindakan' },
+  res_gross:        { en: 'Gross income',                   bm: 'Pendapatan kasar' },
+  res_ded_stat:     { en: 'Statutory deductions (EPF, SOCSO)', bm: 'Potongan berkanun (KWSP, PERKESO)' },
+  res_ded_reliefs:  { en: 'Personal reliefs',                bm: 'Pelepasan peribadi' },
+  res_chargeable:   { en: 'Chargeable income',               bm: 'Pendapatan bercukai' },
+  res_tax:          { en: 'Tax on chargeable income',       bm: 'Cukai atas pendapatan bercukai' },
+  res_rebates:      { en: 'Rebates (zakat, individual)',    bm: 'Rebat (zakat, individu)' },
+  res_final:        { en: 'Tax payable',                     bm: 'Cukai kena bayar' },
+  res_refund:       { en: 'Refund from PCB',                 bm: 'Bayaran balik dari PCB' },
+
+  act_title:        { en: 'Before 31 December',              bm: 'Sebelum 31 Disember' },
+  act_sub:          { en: 'Three moves that still shift this year\u2019s bill. Ranked by ringgit-for-ringgit efficiency.', bm: 'Tiga langkah yang masih mengubah bil tahun ini. Disusun mengikut kecekapan.' },
+  act_spend:        { en: 'Spend',                           bm: 'Belanja' },
+  act_save:         { en: 'Save',                            bm: 'Jimat' },
+  act_deadline:     { en: 'Deadline',                         bm: 'Tarikh akhir' },
+  act_why:          { en: 'Why this works',                   bm: 'Kenapa ini berkesan' },
+  act_add:          { en: 'Add to plan',                      bm: 'Tambah ke pelan' },
+  act_added:        { en: 'Added',                             bm: 'Ditambah' },
+  act_next:         { en: 'Ask Taxation a question',         bm: 'Tanya Taxation soalan' },
+
+  chat_title:       { en: 'Ask Taxation',                     bm: 'Tanya Taxation' },
+  chat_sub:         { en: 'Grounded in the Income Tax Act 1967 and LHDN Public Rulings.', bm: 'Berasaskan Akta Cukai Pendapatan 1967 dan Ketetapan Umum LHDN.' },
+  chat_placeholder: { en: 'Ask anything — e.g. \u201cCan I claim my laptop under lifestyle?\u201d', bm: 'Tanya apa sahaja — cth. "Boleh saya tuntut laptop di bawah gaya hidup?"' },
+  chat_send:        { en: 'Send',                              bm: 'Hantar' },
+  chat_thinking:    { en: 'Taxation is checking LHDN rulings',  bm: 'Taxation sedang menyemak ketetapan LHDN' },
+  chat_disclaimer:  { en: 'Demo responses. Not a substitute for a licensed tax agent.', bm: 'Respons demo. Bukan pengganti ejen cukai berlesen.' },
+  chat_suggest_1:   { en: 'What reliefs can I double-up with my spouse?', bm: 'Pelepasan apa boleh digabung dengan pasangan?' },
+  chat_suggest_2:   { en: 'Is a MacBook claimable this year?', bm: 'Bolehkah MacBook dituntut tahun ini?' },
+  chat_suggest_3:   { en: 'Difference between relief and rebate?', bm: 'Beza pelepasan dan rebat?' },
+};
+
+function useI18n(lang) {
+  return React.useCallback((key) => {
+    const entry = DICT[key];
+    if (!entry) return key;
+    return entry[lang] || entry.en || key;
+  }, [lang]);
+}
+
+function fmtRM(n, opts = {}) {
+  const { decimals = 0, plus = false } = opts;
+  const num = Math.round(Number(n) * 100) / 100;
+  const sign = plus && num > 0 ? '+' : '';
+  return sign + 'RM ' + num.toLocaleString('en-MY', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+window.useI18n = useI18n; window.fmtRM = fmtRM;
+
+// Wizard questions (presentation only; the backend owns the relief logic)
+const QUESTIONS = [
+  { id: 'married',   key: 'wiz_q_married',   hint: 'wiz_hint_married',   icon: 'users' },
+  { id: 'kids',      key: 'wiz_q_kids',      hint: 'wiz_hint_kids',      icon: 'users' },
+  { id: 'parents',   key: 'wiz_q_parents',   hint: 'wiz_hint_parents',   icon: 'heart' },
+  { id: 'sspn',      key: 'wiz_q_sspn',      hint: 'wiz_hint_sspn',      icon: 'book' },
+  { id: 'lifestyle', key: 'wiz_q_lifestyle', hint: 'wiz_hint_lifestyle', icon: 'sparkle' },
+  { id: 'insurance', key: 'wiz_q_insurance', hint: 'wiz_hint_insurance', icon: 'shield' },
+  { id: 'prs',       key: 'wiz_q_prs',       hint: 'wiz_hint_prs',       icon: 'coin' },
+  { id: 'zakat',     key: 'wiz_q_zakat',     hint: 'wiz_hint_zakat',     icon: 'diamond' },
+];
+
+// ===== ui.jsx — shared primitives =====
+function Button({ children, variant = 'primary', size = 'md', className = '', ...rest }) {
+  const base = 'inline-flex items-center justify-center gap-2 font-medium transition-all rounded-full whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed';
+  const sizes = { sm: 'px-3.5 py-1.5 text-sm', md: 'px-5 py-2.5 text-[15px]', lg: 'px-7 py-3.5 text-base' };
+  const variants = {
+    primary: 'btn-primary shadow-sm hover:shadow-md active:scale-[0.98]',
+    secondary: 'bg-white text-ink border border-line hover:bg-paper-2 active:scale-[0.98]',
+    ghost: 'bg-transparent text-ink-2 hover:bg-paper-2',
+    dark: 'bg-teal-900b text-white hover:opacity-90 active:scale-[0.98]',
+  };
+  return <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...rest}>{children}</button>;
+}
+
+function Chip({ children, tone = 'teal', className = '', onClick }) {
+  const tones = {
+    teal: 'chip-citation', neutral: 'bg-paper-2 text-ink-2 border border-line',
+    green: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+    amber: 'bg-amber-50 text-amber-800 border border-amber-200',
+  };
+  return <button onClick={onClick} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium tabular tracking-tight transition-colors ${tones[tone]} ${className}`}>{children}</button>;
+}
+
+function Icon({ name, className = 'w-5 h-5' }) {
+  const props = { className, fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', viewBox: '0 0 24 24' };
+  const paths = {
+    arrowLeft:  <path d="M15 18l-6-6 6-6" />, arrowRight: <path d="M9 6l6 6-6 6" />, check: <path d="M5 13l4 4L19 7" />,
+    close: <path d="M6 6l12 12M18 6l-6 6-6 6" />,
+    upload: <><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 20h16" /></>,
+    doc: <><path d="M7 3h7l5 5v13H7z" /><path d="M14 3v5h5" /><path d="M9 13h8M9 17h6" /></>,
+    sparkle: <><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" /><path d="M19 15l.8 1.7L21.5 17.5l-1.7.8L19 20l-.8-1.7L16.5 17.5l1.7-.8z" /></>,
+    shield: <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6z" />,
+    chat:   <path d="M4 5h16v11H9l-5 4z" />,
+    plus:   <path d="M12 5v14M5 12h14" />,
+    user:   <><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></>,
+    users:  <><circle cx="9" cy="8" r="3.5" /><path d="M3 20c1-3.5 3.5-5 6-5s5 1.5 6 5" /><path d="M16 4.5a3.5 3.5 0 010 7M19 20c-.7-2.5-1.9-4-3.5-4.6" /></>,
+    briefcase: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5h6v2M3 13h18" /></>,
+    camera: <><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="12" cy="13.5" r="3.5" /><path d="M9 7l1.5-3h3L15 7"/></>,
+    book:   <><path d="M4 4h6a4 4 0 014 4v12" /><path d="M20 4h-6a4 4 0 00-4 4v12" /></>,
+    send:   <path d="M4 12l16-8-6 16-2-7z" />,
+    heart:  <path d="M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z" />,
+    coin:   <><circle cx="12" cy="12" r="9" /><path d="M9 10c.5-1.5 2-2 3-2s3 .5 3 2-1.5 2-3 2-3 .5-3 2 1.5 2 3 2 2.5-.5 3-2M12 6v2M12 16v2" /></>,
+    diamond: <path d="M6 3h12l4 6-10 12L2 9z" />,
+  };
+  return <svg {...props}>{paths[name] || null}</svg>;
+}
+
+function Logo({ className = 'w-8 h-8' }) {
+  return (
+    <svg viewBox="0 0 40 40" className={className} aria-hidden="true">
+      <defs><linearGradient id="lg-tax" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="oklch(0.74 0.12 195)" /><stop offset="1" stopColor="oklch(0.48 0.11 205)" /></linearGradient></defs>
+      <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#lg-tax)" />
+      <path d="M12 25 L18 19 L22 23 L28 13" fill="none" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="28" cy="13" r="2.2" fill="white" />
+    </svg>
+  );
+}
+
+function useCountUp(to, durationMs = 900) {
+  const [val, setVal] = React.useState(0);
+  React.useEffect(() => {
+    let raf; const start = performance.now(); const ease = (t) => 1 - Math.pow(1 - t, 3);
+    const tick = (now) => { const t = Math.min(1, (now - start) / durationMs); setVal(to * ease(t)); if (t < 1) raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick); return () => cancelAnimationFrame(raf);
+  }, [to, durationMs]);
+  return val;
+}
+
+function Progress({ value, className = '' }) {
+  return <div className={`h-1.5 w-full rounded-full bg-paper-2 overflow-hidden ${className}`}><div className="h-full bg-teal-brand transition-all duration-500 ease-out" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} /></div>;
+}
+
+function Segmented({ options, value, onChange, className = '' }) {
+  return (
+    <div className={`inline-flex items-center gap-0.5 bg-paper-2 border border-line rounded-full p-0.5 ${className}`}>
+      {options.map(opt => {
+        const active = opt.value === value;
+        return <button key={opt.value} onClick={() => onChange(opt.value)} className={`px-3 py-1.5 rounded-full text-[12.5px] font-medium transition-all ${active ? 'bg-white text-ink shadow-sm' : 'text-ink-3 hover:text-ink-2'}`}>{opt.label}</button>;
+      })}
+    </div>
+  );
+}
+
+// ===== Navbar.jsx =====
+function Navbar({ lang, onLang, mode, onMode, onBack, onRestart, canBack, t, step, totalSteps }) {
+  const modeIcons = { individual: 'user', sme: 'briefcase', freelancer: 'camera' };
+  const steps = ['Landing', 'Mode', 'Upload', 'Questions', 'Results', 'Plan', 'Chat'];
+  return (
+    <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur border-b border-line">
+      <div className="max-w-[1200px] mx-auto px-5 md:px-8 h-16 flex items-center gap-4">
+        <button onClick={onRestart} className="flex items-center gap-2.5 group">
+          <Logo className="w-8 h-8" />
+          <div className="leading-tight">
+            <div className="font-semibold tracking-tight text-[15px]">Taxation</div>
+            <div className="text-[10.5px] text-ink-3 tracking-wider uppercase font-mono">YA 2025 · LHDN</div>
+          </div>
+        </button>
+        {mode && (
+          <div className="hidden md:flex items-center ml-4">
+            <div className="flex items-center gap-2 pl-4 border-l border-line">
+              <button onClick={onMode} className="flex items-center gap-2 text-[13px] text-ink-2 hover:text-ink transition-colors group">
+                <Icon name={modeIcons[mode]} className="w-4 h-4" /><span>{t(`nav_mode_${mode}`)}</span>
+                <span className="text-ink-3 group-hover:text-teal-brand">↳</span>
+              </button>
+            </div>
+          </div>
+        )}
+        {typeof step === 'number' && totalSteps > 0 && (
+          <div className="hidden lg:flex items-center gap-1.5 ml-auto mr-2">
+            {steps.slice(0, totalSteps).map((s, i) => (
+              <div key={i} className="flex items-center gap-1.5"><span className={`w-1.5 h-1.5 rounded-full transition-all ${i === step ? 'bg-teal-brand scale-150' : i < step ? 'bg-teal-brand/50' : 'bg-line'}`} /></div>
+            ))}
+          </div>
+        )}
+        <div className={`flex items-center gap-2 ${typeof step === 'number' ? '' : 'ml-auto'}`}>
+          {canBack && <Button variant="ghost" size="sm" onClick={onBack}><Icon name="arrowLeft" className="w-4 h-4" />{t('nav_back')}</Button>}
+          <Segmented options={[{ value: 'en', label: 'EN' }, { value: 'bm', label: 'BM' }]} value={lang} onChange={onLang} />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+// ===== PageLanding.jsx =====
+function PageLanding({ t, onStart }) {
+  return (
+    <main className="relative">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 grid-bg opacity-60 pointer-events-none" />
+        <div className="absolute -top-40 -right-40 w-[520px] h-[520px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle at center, oklch(0.88 0.07 195 / 0.55), transparent 60%)' }} />
+        <div className="relative max-w-[1200px] mx-auto px-5 md:px-8 pt-20 md:pt-28 pb-24">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white border border-line px-3 py-1.5 text-[12px] text-ink-2 font-mono tracking-wide">
+            <span className="w-1.5 h-1.5 rounded-full bg-teal-brand relative"><span className="pulse-ring" /></span>{t('landing_eyebrow')}
+          </div>
+          <h1 className="mt-6 font-display text-5xl md:text-7xl lg:text-[84px] leading-[1.02] tracking-tight text-ink max-w-5xl">
+            {t('landing_title_a')}<br /><span className="text-teal-brand">{t('landing_title_b')}</span>
+          </h1>
+          <p className="mt-7 text-[17px] md:text-[19px] text-ink-2 max-w-2xl leading-relaxed" style={{ textWrap: 'pretty' }}>{t('landing_sub')}</p>
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Button size="lg" onClick={onStart}>{t('landing_cta')}<Icon name="arrowRight" className="w-4 h-4" /></Button>
+            <div className="text-[13px] text-ink-3 font-mono">{t('landing_cta_sub')}</div>
+          </div>
+          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-px bg-line rounded-2xl overflow-hidden border border-line max-w-3xl">
+            {[{ num: 'RM 1,847', sub: t('landing_stat_1') }, { num: '73%', sub: t('landing_stat_2') }, { num: '23', sub: t('landing_stat_3') }].map((s, i) => (
+              <div key={i} className="bg-white p-5"><div className="font-display text-3xl tracking-tight tabular">{s.num}</div><div className="text-[12.5px] text-ink-3 mt-1 leading-snug">{s.sub}</div></div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <section className="relative max-w-[1200px] mx-auto px-5 md:px-8 pb-24">
+        <div className="relative bg-white border border-line rounded-3xl p-8 md:p-10 overflow-hidden card-soft">
+          <div className="absolute -right-10 -top-10 w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, oklch(0.94 0.04 195 / 0.6), transparent 65%)' }} />
+          <div className="grid md:grid-cols-2 gap-10 items-center relative">
+            <div>
+              <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Preview · demo figures</div>
+              <div className="mt-2 font-display text-4xl md:text-5xl tracking-tight">What filers usually see after a session.</div>
+              <div className="mt-4 text-ink-2 leading-relaxed max-w-md">Every relief on your report cites the exact section of the Income Tax Act 1967 or the LHDN Public Ruling it came from. Nothing guessed.</div>
+              <div className="mt-6 flex flex-wrap gap-1.5">
+                <Chip>ITA s.46(1)(a)</Chip><Chip>ITA s.49(1D)</Chip><Chip>ITA s.49(1B)</Chip><Chip>ITA s.46(1)(k)</Chip><Chip>ITA s.46(1)(p)</Chip>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="rounded-2xl border border-line bg-paper-2 p-5 font-mono text-[12.5px] leading-7 text-ink-2">
+                <div className="flex justify-between text-ink-3"><span>Gross income</span><span className="tabular">RM 104,000</span></div>
+                <div className="flex justify-between"><span>– EPF, SOCSO</span><span className="tabular text-ink-3">– RM 4,350</span></div>
+                <div className="flex justify-between"><span>– Personal reliefs</span><span className="tabular text-ink-3">– RM 28,850</span></div>
+                <div className="border-t border-line my-2"></div>
+                <div className="flex justify-between"><span>Chargeable income</span><span className="tabular">RM 70,800</span></div>
+                <div className="flex justify-between"><span>Tax (before rebates)</span><span className="tabular">RM 3,852</span></div>
+                <div className="flex justify-between"><span>– Zakat rebate</span><span className="tabular text-ink-3">– RM 1,800</span></div>
+                <div className="border-t border-line my-2"></div>
+                <div className="flex justify-between font-semibold text-ink"><span>Tax payable</span><span className="tabular">RM 2,052</span></div>
+                <div className="mt-3 rounded-md bg-teal-50b border border-teal-200b p-3 text-teal-700b">
+                  <div className="flex items-center justify-between"><span>Refund due from PCB</span><span className="tabular font-semibold">RM 2,748</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+// ===== PageMode.jsx =====
+function PageMode({ t, lang, onPick }) {
+  const cards = [
+    { id: 'individual', icon: 'user', name: t('mode_ind_name'), desc: t('mode_ind_desc'), meta: [{ en: 'Form BE', bm: 'Borang BE' }, { en: 'EA-driven', bm: 'Asas EA' }], accent: 'from-[oklch(0.88_0.07_195_/_0.9)] to-[oklch(0.94_0.04_195_/_0.4)]' },
+    { id: 'sme', icon: 'briefcase', name: t('mode_sme_name'), desc: t('mode_sme_desc'), meta: [{ en: 'Form C', bm: 'Borang C' }, { en: 'P&L-driven', bm: 'Asas P&L' }], accent: 'from-[oklch(0.82_0.08_210_/_0.9)] to-[oklch(0.92_0.05_210_/_0.4)]' },
+    { id: 'freelancer', icon: 'camera', name: t('mode_free_name'), desc: t('mode_free_desc'), meta: [{ en: 'Form B', bm: 'Borang B' }, { en: 'Ledger-driven', bm: 'Asas lejar' }], accent: 'from-[oklch(0.86_0.08_175_/_0.9)] to-[oklch(0.94_0.04_175_/_0.4)]' },
+  ];
+  const label = (m) => m[lang] || m.en;
+  return (
+    <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
+      <div className="max-w-2xl">
+        <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 01 / 07</div>
+        <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('mode_title')}</h1>
+        <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t('mode_sub')}</p>
+      </div>
+      <div className="mt-14 grid md:grid-cols-3 gap-5">
+        {cards.map((c, i) => (
+          <button key={c.id} onClick={() => onPick(c.id)} className="group relative text-left rounded-3xl border border-line bg-white p-7 transition-all hover:-translate-y-1 hover:shadow-[0_16px_40px_-16px_rgba(15,42,60,0.2)] focus:outline-none focus:ring-2 focus:ring-teal-200b overflow-hidden" style={{ animationDelay: `${i * 70}ms` }}>
+            <div className={`absolute inset-x-0 top-0 h-36 bg-gradient-to-br ${c.accent} pointer-events-none`} />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-white shadow-sm border border-line flex items-center justify-center text-teal-brand"><Icon name={c.icon} className="w-6 h-6" /></div>
+              <div className="mt-16 font-display text-3xl tracking-tight">{c.name}</div>
+              <div className="mt-2 text-[14.5px] text-ink-2 leading-relaxed min-h-[3em]">{c.desc}</div>
+              <div className="mt-5 flex flex-wrap gap-1.5">{c.meta.map((m, j) => <span key={j} className="inline-flex items-center rounded-full bg-paper-2 border border-line px-2.5 py-1 text-[11.5px] font-mono text-ink-2">{label(m)}</span>)}</div>
+              <div className="mt-6 flex items-center justify-between">
+                <span className="text-[13px] font-medium text-teal-brand group-hover:translate-x-1 transition-transform inline-flex items-center gap-1.5">{t('mode_select')} <Icon name="arrowRight" className="w-4 h-4" /></span>
+                <span className="text-[11px] font-mono text-ink-3">0{cards.findIndex(x => x.id === c.id) + 1}</span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </main>
+  );
+}
+
+// ===== PageUpload.jsx =====
+function PageUpload({ t, lang, mode, onDone }) {
+  const [phase, setPhase] = React.useState('idle');
+  const [step, setStep] = React.useState(0);
+  const [dragOver, setDragOver] = React.useState(false);
+  const [fields, setFields] = React.useState(null);
+  const [fileName, setFileName] = React.useState('');
+  const subKey = mode === 'sme' ? 'upload_sub_sme' : mode === 'freelancer' ? 'upload_sub_free' : 'upload_sub_ind';
+
+  const startRead = (name) => {
+    setFileName(name || (mode === 'sme' ? 'P&L_FY2025.pdf' : 'EA_Form_2025.pdf'));
+    setPhase('reading'); setStep(0);
+    let s = 0;
+    const iv = setInterval(() => {
+      s++; setStep(s);
+      if (s >= 3) {
+        clearInterval(iv);
+        // fetch the sample/extracted figures from the backend
+        API.get('/api/sample/' + mode).then((data) => {
+          setTimeout(() => { setFields({ ...data }); setPhase('confirm'); }, 350);
+        }).catch(() => { setFields(mode === 'sme' ? { grossIncome: 0 } : { grossIncome: 0, bonus: 0, epf: 0, pcb: 0 }); setPhase('confirm'); });
+      }
+    }, 680);
+  };
+  const onDrop = (e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer?.files?.[0]; startRead(f ? f.name : null); };
+  const label = (k) => t(k);
+
+  return (
+    <main className="max-w-[1000px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
+      <div className="max-w-2xl">
+        <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 02 / 07</div>
+        <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('upload_title')}</h1>
+        <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t(subKey)}</p>
+      </div>
+
+      {phase === 'idle' && (
+        <div className="mt-12 fade-in">
+          <div onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={onDrop} onClick={() => startRead(null)}
+            className={`relative rounded-3xl border-2 border-dashed p-14 md:p-20 text-center cursor-pointer transition-all ${dragOver ? 'border-teal-brand bg-teal-50b' : 'border-line bg-white hover:bg-paper-2'}`}>
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-teal-50b text-teal-brand flex items-center justify-center"><Icon name="upload" className="w-7 h-7" /></div>
+            <div className="mt-5 font-display text-2xl tracking-tight">{t('upload_cta')}</div>
+            <div className="mt-2 text-[13px] text-ink-3 font-mono">{t('upload_cta_sub')}</div>
+          </div>
+          <div className="mt-4 text-center"><button onClick={() => startRead(null)} className="text-[13.5px] text-teal-brand font-medium hover:underline">{t('upload_sample')} →</button></div>
+        </div>
+      )}
+
+      {phase === 'reading' && (
+        <div className="mt-12 fade-in">
+          <div className="rounded-3xl border border-line bg-white p-8 md:p-10">
+            <div className="flex items-center gap-4">
+              <div className="relative w-12 h-12 rounded-2xl bg-teal-50b text-teal-brand flex items-center justify-center"><Icon name="doc" className="w-6 h-6" /><span className="pulse-ring" /></div>
+              <div><div className="text-[15px] font-medium">{t('upload_reading')}</div><div className="text-[12.5px] text-ink-3 font-mono">{fileName}</div></div>
+            </div>
+            <div className="mt-8 space-y-3">
+              {[t('upload_step_1'), t('upload_step_2'), t('upload_step_3')].map((s, i) => {
+                const done = step > i, active = step === i;
+                return (
+                  <div key={i} className="flex items-center gap-3 text-[14px]">
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${done ? 'bg-teal-brand text-white' : active ? 'border-2 border-teal-brand' : 'border border-line'}`}>{done && <Icon name="check" className="w-3 h-3" />}</div>
+                    <span className={done || active ? 'text-ink' : 'text-ink-3'}>{s}</span>{active && <span className="ml-auto text-[11.5px] font-mono text-ink-3">…</span>}
+                  </div>
+                );
+              })}
+            </div>
+            <Progress value={(step / 3) * 100} className="mt-8" />
+          </div>
+        </div>
+      )}
+
+      {phase === 'confirm' && fields && (
+        <div className="mt-12 fade-in">
+          <div className="rounded-3xl border border-line bg-white overflow-hidden">
+            <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b border-line">
+              <div><div className="font-display text-2xl tracking-tight">{t('upload_confirm')}</div><div className="text-[13px] text-ink-3 mt-0.5">{t('upload_confirm_sub')}</div></div>
+              <Chip tone="green"><Icon name="check" className="w-3 h-3" /> Extracted</Chip>
+            </div>
+            <div className="grid md:grid-cols-2 gap-px bg-line">
+              {Object.entries(extractMap(fields, mode)).map(([key, v]) => (
+                <div key={key} className="bg-white p-5 md:p-6">
+                  <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{label(v.labelKey)}</div>
+                  <div className="mt-2 flex items-baseline gap-1">
+                    <span className="text-[15px] text-ink-3">RM</span>
+                    <input type="text" value={Number(fields[key] || 0).toLocaleString('en-MY')} onChange={(e) => { const n = Number((e.target.value || '').replace(/[^0-9.]/g, '')) || 0; setFields({ ...fields, [key]: n }); }}
+                      className="font-display text-3xl tabular tracking-tight bg-transparent focus:outline-none focus:ring-2 focus:ring-teal-200b rounded px-1 -mx-1 w-full" />
+                  </div>
+                  {v.hint && <div className="mt-1 text-[12px] text-ink-3">{v.hint}</div>}
+                </div>
+              ))}
+            </div>
+            <div className="px-6 md:px-8 py-5 bg-paper-2 border-t border-line flex items-center justify-between">
+              <div className="text-[12.5px] text-ink-3 font-mono">{fileName} · {mode === 'sme' ? 'Form C source' : 'Form EA source'}</div>
+              <Button onClick={() => onDone(fields)}>{t('upload_continue')}<Icon name="arrowRight" className="w-4 h-4" /></Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
+
+function extractMap(fields, mode) {
+  if (mode === 'sme') return {
+    grossIncome: { labelKey: 'f_gross' },
+    allowableExp: { labelKey: 'f_gross', hint: 'Allowable expenses' },
+    capAllowance: { labelKey: 'f_gross', hint: 'Capital allowance' },
+    directorFees: { labelKey: 'f_gross', hint: 'Director fees' },
+  };
+  return {
+    grossIncome: { labelKey: 'f_gross' },
+    bonus:       { labelKey: 'f_bonus' },
+    epf:         { labelKey: 'f_epf' },
+    pcb:         { labelKey: 'f_pcb_total', hint: 'Aggregated from 12 monthly MTD deductions' },
+  };
+}
+
+// ===== PageWizard.jsx =====
+function PageWizard({ t, onDone }) {
+  const [idx, setIdx] = React.useState(0);
+  const [answers, setAnswers] = React.useState({});
+  const [dir, setDir] = React.useState(1);
+  const total = QUESTIONS.length;
+  const q = QUESTIONS[idx];
+  const current = answers[q.id];
+
+  const answer = (val) => {
+    const next = { ...answers, [q.id]: val };
+    setAnswers(next); setDir(1);
+    setTimeout(() => { if (idx < total - 1) setIdx(idx + 1); else onDone(next); }, 260);
+  };
+  const back = () => { if (idx > 0) { setDir(-1); setIdx(idx - 1); } };
+
+  return (
+    <main className="max-w-[900px] mx-auto px-5 md:px-8 pt-14 pb-24">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 03 / 07</div>
+          <h1 className="mt-2 font-display text-4xl md:text-5xl tracking-tight">{t('wiz_title')}</h1>
+          <p className="mt-2 text-[15px] text-ink-2">{t('wiz_sub')}</p>
+        </div>
+        <div className="text-right">
+          <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{t('wiz_progress')}</div>
+          <div className="font-display text-4xl tabular tracking-tight mt-1"><span className="text-teal-brand">{String(idx + 1).padStart(2, '0')}</span><span className="text-ink-3"> / {total}</span></div>
+        </div>
+      </div>
+      <Progress value={(idx / total) * 100} />
+      <div key={idx} className="mt-10 rounded-3xl border border-line bg-white p-8 md:p-12 slide-in" style={{ animationDirection: dir > 0 ? 'normal' : 'reverse' }}>
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-teal-50b text-teal-brand flex items-center justify-center shrink-0"><Icon name={q.icon} className="w-6 h-6" /></div>
+          <div className="flex-1">
+            <div className="text-[12px] uppercase tracking-[0.15em] text-ink-3 font-mono">{t('wiz_progress')} {idx + 1} {t('wiz_of')} {total}</div>
+            <div className="mt-2 font-display text-3xl md:text-[40px] leading-[1.15] tracking-tight" style={{ textWrap: 'balance' }}>{t(q.key)}</div>
+            <div className="mt-4 text-[13.5px] text-ink-3 italic">{t(q.hint)}</div>
+          </div>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-3">
+          {[{ v: 'yes', label: t('wiz_yes') }, { v: 'no', label: t('wiz_no') }].map(opt => (
+            <button key={opt.v} onClick={() => answer(opt.v)} className={`group relative rounded-2xl border px-6 py-5 text-left transition-all active:scale-[0.99] ${current === opt.v ? 'border-teal-brand bg-teal-50b' : 'border-line bg-white hover:border-ink-3 hover:bg-paper-2'}`}>
+              <div className="flex items-center justify-between">
+                <span className="font-display text-2xl tracking-tight">{opt.label}</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${current === opt.v ? 'bg-teal-brand text-white' : 'border border-line text-ink-3 group-hover:border-ink-2'}`}><Icon name={opt.v === 'yes' ? 'check' : 'close'} className="w-4 h-4" /></div>
+              </div>
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 flex items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={back} disabled={idx === 0}><Icon name="arrowLeft" className="w-4 h-4" /> {t('wiz_back')}</Button>
+          <button onClick={() => answer('skip')} className="text-[13px] text-ink-3 hover:text-ink-2 transition-colors">{t('wiz_skip')} →</button>
+        </div>
+      </div>
+      <div className="mt-8 flex flex-wrap gap-2">
+        {QUESTIONS.slice(0, idx).map(prev => (
+          <span key={prev.id} className="inline-flex items-center gap-1.5 rounded-full bg-white border border-line px-2.5 py-1 text-[11.5px] font-mono text-ink-3">
+            <Icon name={prev.icon} className="w-3 h-3" /><span className="capitalize">{prev.id}</span>
+            <span className={`tabular ${answers[prev.id] === 'yes' ? 'text-teal-brand' : 'text-ink-3'}`}>{answers[prev.id] === 'yes' ? '✓' : answers[prev.id] === 'no' ? '—' : '?'}</span>
+          </span>
+        ))}
+      </div>
+    </main>
+  );
+}
+
+// ===== Loading screen (while backend computes) =====
+function PageCalculating({ t }) {
+  return (
+    <main className="max-w-[900px] mx-auto px-5 md:px-8 pt-32 pb-24 text-center fade-in">
+      <div className="mx-auto w-16 h-16 rounded-2xl bg-teal-50b text-teal-brand flex items-center justify-center relative"><Icon name="doc" className="w-7 h-7" /><span className="pulse-ring" /></div>
+      <div className="mt-6 font-display text-3xl tracking-tight">{t('wiz_calculating')}</div>
+      <div className="mt-3 text-[14px] text-ink-3 font-mono">ITA 1967 · LHDN YA 2025</div>
+    </main>
+  );
+}
+
+// ===== PageResults.jsx =====
+function PageResults({ t, lang, calc, onNext }) {
+  const savingsVal = useCountUp(calc.savings, 1200);
+  const payableVal = useCountUp(calc.payable, 900);
+  const refundVal  = useCountUp(calc.refund, 900);
+  const steps = [
+    { label: t('res_gross'),       value: calc.gross,        tone: 'start' },
+    { label: t('res_ded_stat'),    value: -calc.statutory,   tone: 'minus' },
+    { label: t('res_ded_reliefs'), value: -calc.reliefTotal, tone: 'minus' },
+    { label: t('res_chargeable'),  value: calc.chargeable,   tone: 'sub' },
+    { label: t('res_tax'),         value: calc.tax,          tone: 'tax' },
+    { label: t('res_rebates'),     value: -calc.rebate,      tone: 'minus' },
+    { label: t('res_final'),       value: calc.payable,      tone: 'final' },
+  ];
+  const maxAbs = Math.max(...steps.map(s => Math.abs(s.value)), 1);
+  return (
+    <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-10 pb-24 slide-in">
+      <section className="rounded-3xl overflow-hidden border border-line relative bg-white card-soft">
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(1200px 400px at 10% 0%, oklch(0.88 0.07 195 / 0.55), transparent 60%)' }} />
+        <div className="relative p-8 md:p-12 grid lg:grid-cols-[1.3fr_1fr] gap-10 items-end">
+          <div>
+            <div className="text-[11.5px] uppercase tracking-[0.18em] text-ink-3 font-mono">{t('res_eyebrow')}</div>
+            <div className="mt-3 text-[17px] text-ink-2">{t('res_you_save')}</div>
+            <div className="mt-2 font-display text-[88px] md:text-[128px] leading-[0.95] tracking-[-0.04em] text-teal-brand tabular">{fmtRM(savingsVal)}</div>
+            <div className="mt-3 text-[14px] text-ink-3 max-w-lg leading-snug">{t('res_vs_default')}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-paper-2 border border-line p-5"><div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{t('res_final')}</div><div className="mt-2 font-display text-3xl tabular tracking-tight">{fmtRM(payableVal)}</div></div>
+            <div className="rounded-2xl bg-teal-50b border border-teal-200b p-5"><div className="text-[11.5px] uppercase tracking-[0.12em] text-teal-700b font-mono">{t('res_refund')}</div><div className="mt-2 font-display text-3xl tabular tracking-tight text-teal-700b">{fmtRM(refundVal)}</div></div>
+            <div className="col-span-2 rounded-2xl bg-white border border-line p-5 flex items-center justify-between">
+              <div><div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">PCB withheld</div><div className="mt-1 font-mono text-[15px] tabular">{fmtRM(calc.pcb)}</div></div>
+              <div className="text-right"><div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">Effective rate</div><div className="mt-1 font-mono text-[15px] tabular">{calc.effectiveRate}%</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div className="mt-10 grid lg:grid-cols-[1.4fr_1fr] gap-6">
+        <section className="rounded-3xl border border-line bg-white overflow-hidden">
+          <div className="px-7 py-5 border-b border-line flex items-center justify-between">
+            <div><div className="font-display text-2xl tracking-tight">{t('res_reliefs_found')}</div><div className="text-[13px] text-ink-3 mt-0.5">{calc.reliefs.length} items · {fmtRM(calc.reliefTotal)} total</div></div>
+            <div className="flex items-center gap-2 text-[11.5px] font-mono"><span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-teal-brand" /> {t('res_newly')}</span><span className="inline-flex items-center gap-1.5 text-ink-3"><span className="w-2 h-2 rounded-full bg-ink-3/40" /> {t('res_already')}</span></div>
+          </div>
+          <div className="divide-y divide-[color:var(--line)]">
+            {calc.reliefs.map((r) => {
+              const label = r.name[lang] || r.name.en; const isNew = r.isNew;
+              return (
+                <div key={r.id} className="px-7 py-4 flex items-center gap-4 hover:bg-paper-2 transition-colors group">
+                  <div className="w-1 self-stretch rounded-full" style={{ background: isNew ? 'var(--teal-600)' : 'var(--line)' }} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[14.5px] font-medium">{label}</span>
+                      {isNew ? <Chip tone="teal"><Icon name="sparkle" className="w-3 h-3" /> {t('res_newly')}</Chip> : <Chip tone="neutral">{t('res_already')}</Chip>}
+                      <Chip tone="neutral" className="font-mono">{r.cite}</Chip>
+                    </div>
+                    <div className="mt-1 text-[12px] text-ink-3 font-mono">cap {fmtRM(r.cap)}{r.claimed ? ` · prior claim ${fmtRM(r.claimed)}` : ''}</div>
+                  </div>
+                  <div className="text-right tabular">
+                    <div className={`font-display text-xl tracking-tight ${isNew ? 'text-teal-brand' : ''}`}>{fmtRM(r.amount)}</div>
+                    {isNew && r.amount > 0 && <div className="text-[11.5px] text-ink-3 font-mono">+{fmtRM(r.amount - (r.claimed || 0))} new</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+        <section className="rounded-3xl border border-line bg-white p-7">
+          <div className="font-display text-2xl tracking-tight">{t('res_waterfall')}</div>
+          <div className="text-[13px] text-ink-3 mt-0.5">Derivation from gross to final payable</div>
+          <div className="mt-6 space-y-2">
+            {steps.map((s, i) => {
+              const isNeg = s.value < 0; const pct = Math.min(100, (Math.abs(s.value) / maxAbs) * 100);
+              const colors = { start: 'bg-ink', minus: 'bg-[color:oklch(0.78_0.05_30)]', sub: 'bg-ink-2', tax: 'bg-[color:oklch(0.66_0.13_25)]', final: 'bg-teal-brand' };
+              const isFinal = s.tone === 'final' || s.tone === 'sub';
+              return (
+                <div key={i}>
+                  <div className="flex items-baseline justify-between text-[12.5px] font-mono">
+                    <span className={isFinal ? 'text-ink font-semibold' : 'text-ink-2'}>{s.label}</span>
+                    <span className={`tabular ${isNeg ? 'text-ink-3' : isFinal ? 'text-ink' : 'text-ink-2'}`}>{isNeg ? '– ' : ''}{fmtRM(Math.abs(s.value))}</span>
+                  </div>
+                  <div className="h-2 mt-1 rounded-full bg-paper-2 overflow-hidden"><div className={`h-full rounded-full transition-all ${colors[s.tone]}`} style={{ width: pct + '%' }} /></div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-6 rounded-2xl bg-teal-50b border border-teal-200b p-4">
+            <div className="text-[11.5px] uppercase tracking-[0.12em] text-teal-700b font-mono">Bottom line</div>
+            <div className="mt-1 flex items-baseline justify-between"><span className="text-[14px] text-ink-2">{t('res_refund')}</span><span className="font-display text-2xl tabular tracking-tight text-teal-700b">{fmtRM(calc.refund)}</span></div>
+          </div>
+        </section>
+      </div>
+      <div className="mt-10 flex items-center justify-end"><Button size="lg" onClick={onNext}>{t('res_next')}<Icon name="arrowRight" className="w-4 h-4" /></Button></div>
+    </main>
+  );
+}
+
+// ===== PageAction.jsx =====
+function PageAction({ t, lang, actions, onNext }) {
+  const [added, setAdded] = React.useState({});
+  const toggle = (id) => setAdded(a => ({ ...a, [id]: !a[id] }));
+  const label = (m) => m[lang] || m.en;
+  const totalSave = actions.reduce((s, a) => s + a.save, 0);
+  const totalSpend = actions.reduce((s, a) => s + a.spend, 0);
+  return (
+    <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div className="max-w-2xl">
+          <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 05 / 07</div>
+          <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('act_title')}</h1>
+          <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t('act_sub')}</p>
+        </div>
+        <div className="rounded-2xl border border-line bg-white p-5 min-w-[260px]">
+          <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">If you do all three</div>
+          <div className="mt-2 flex items-baseline gap-2"><span className="text-ink-3 text-[14px]">spend</span><span className="font-display text-xl tabular tracking-tight">{fmtRM(totalSpend)}</span></div>
+          <div className="mt-1 flex items-baseline gap-2"><span className="text-teal-brand text-[14px]">save</span><span className="font-display text-2xl tabular tracking-tight text-teal-brand">{fmtRM(totalSave)}</span></div>
+        </div>
+      </div>
+      <div className="mt-12 grid md:grid-cols-3 gap-5">
+        {actions.map((a, i) => {
+          const on = !!added[a.id];
+          return (
+            <div key={a.id} className="rounded-3xl border border-line bg-white overflow-hidden relative flex flex-col">
+              <div className="px-7 pt-7 pb-4">
+                <div className="flex items-start justify-between"><div className="w-10 h-10 rounded-xl bg-teal-50b text-teal-brand flex items-center justify-center"><span className="font-display text-lg tabular">{i + 1}</span></div><Chip tone="teal">{label(a.tag)}</Chip></div>
+                <div className="mt-5 font-display text-[26px] leading-[1.15] tracking-tight" style={{ textWrap: 'balance' }}>{label(a.title)}</div>
+              </div>
+              <div className="px-7 py-4 border-y border-line bg-paper-2/50 grid grid-cols-3 gap-2">
+                <div><div className="text-[10.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{t('act_spend')}</div><div className="mt-1 font-mono text-[14.5px] tabular">{fmtRM(a.spend)}</div></div>
+                <div><div className="text-[10.5px] uppercase tracking-[0.12em] text-teal-700b font-mono">{t('act_save')}</div><div className="mt-1 font-display text-xl tabular tracking-tight text-teal-brand">{fmtRM(a.save)}</div></div>
+                <div><div className="text-[10.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{t('act_deadline')}</div><div className="mt-1 font-mono text-[13px] text-ink-2">{label(a.deadline)}</div></div>
+              </div>
+              <div className="px-7 py-5 flex-1">
+                <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{t('act_why')}</div>
+                <p className="mt-2 text-[13.5px] text-ink-2 leading-relaxed">{label(a.why)}</p>
+                <div className="mt-3"><Chip tone="teal" className="font-mono">{a.cite}</Chip></div>
+              </div>
+              <div className="px-7 pb-6">
+                <button onClick={() => toggle(a.id)} className={`w-full rounded-full py-3 text-[14px] font-medium transition-all ${on ? 'bg-teal-900b text-white' : 'bg-white border border-line hover:bg-paper-2'}`}>
+                  {on ? <span className="inline-flex items-center gap-2"><Icon name="check" className="w-4 h-4" /> {t('act_added')}</span> : <span className="inline-flex items-center gap-2"><Icon name="plus" className="w-4 h-4" /> {t('act_add')}</span>}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-12 flex items-center justify-end"><Button size="lg" onClick={onNext}>{t('act_next')}<Icon name="chat" className="w-4 h-4" /></Button></div>
+    </main>
+  );
+}
+
+// ===== PageChat.jsx — calls /api/chat =====
+function PageChat({ t, lang }) {
+  const [msgs, setMsgs] = React.useState([{ role: 'assistant', text: lang === 'bm' ? 'Hai! Saya Taxation. Tanya apa sahaja tentang pelepasan atau cukai anda — saya akan petik rujukan LHDN.' : 'Hi! I\u2019m Taxation. Ask me anything about your reliefs or tax bill — I\u2019ll cite LHDN sources.', cites: [] }]);
+  const [input, setInput] = React.useState('');
+  const [thinking, setThinking] = React.useState(false);
+  const scrollRef = React.useRef(null);
+
+  React.useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; }, [msgs, thinking]);
+
+  const send = (q) => {
+    if (!q.trim()) return;
+    setMsgs(m => [...m, { role: 'user', text: q }]); setInput(''); setThinking(true);
+    API.post('/api/chat', { question: q, lang }).then((r) => {
+      setMsgs(m => [...m, { role: 'assistant', text: r.text, cites: r.cites || [] }]); setThinking(false);
+    }).catch(() => {
+      setMsgs(m => [...m, { role: 'assistant', text: lang === 'bm' ? 'Maaf, sambungan ke pelayan gagal. Cuba lagi.' : 'Sorry, the connection to the server failed. Please try again.', cites: [] }]); setThinking(false);
+    });
+  };
+
+  const renderText = (text) => (text || '').split(/(\*\*[^*]+\*\*)/g).map((p, i) => p.startsWith('**') && p.endsWith('**') ? <strong key={i} className="font-semibold">{p.slice(2, -2)}</strong> : <span key={i} style={{ whiteSpace: 'pre-wrap' }}>{p}</span>);
+
+  return (
+    <main className="max-w-[900px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
+      <div className="flex items-end justify-between mb-6">
+        <div><div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 06 / 07</div><h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('chat_title')}</h1><p className="mt-3 text-[15.5px] text-ink-2">{t('chat_sub')}</p></div>
+      </div>
+      <div className="rounded-3xl border border-line bg-white overflow-hidden flex flex-col h-[640px]">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-area p-6 md:p-8 space-y-5">
+          {msgs.map((m, i) => (
+            <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+              <div className={`w-8 h-8 rounded-full shrink-0 flex items-center justify-center ${m.role === 'user' ? 'bg-ink text-white' : 'bg-teal-50b text-teal-brand border border-teal-200b'}`}>{m.role === 'user' ? <Icon name="user" className="w-4 h-4" /> : <Logo className="w-5 h-5" />}</div>
+              <div className={`max-w-[78%] ${m.role === 'user' ? 'text-right' : ''}`}>
+                <div className={`rounded-2xl px-4 py-3 text-[14.5px] leading-relaxed ${m.role === 'user' ? 'bg-ink text-white rounded-tr-sm inline-block text-left' : 'bg-paper-2 text-ink rounded-tl-sm'}`}>{renderText(m.text)}</div>
+                {m.cites && m.cites.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{m.cites.map((c, j) => <Chip key={j} className="font-mono">{c}</Chip>)}</div>}
+              </div>
+            </div>
+          ))}
+          {thinking && (
+            <div className="flex gap-3">
+              <div className="w-8 h-8 rounded-full shrink-0 bg-teal-50b text-teal-brand border border-teal-200b flex items-center justify-center"><Logo className="w-5 h-5" /></div>
+              <div className="rounded-2xl rounded-tl-sm px-4 py-3 bg-paper-2 text-ink-3 text-[13.5px] inline-flex items-center gap-2">
+                <span>{t('chat_thinking')}</span>
+                <span className="inline-flex gap-1"><span className="w-1.5 h-1.5 rounded-full bg-teal-brand/70 animate-bounce" style={{ animationDelay: '0ms' }} /><span className="w-1.5 h-1.5 rounded-full bg-teal-brand/70 animate-bounce" style={{ animationDelay: '150ms' }} /><span className="w-1.5 h-1.5 rounded-full bg-teal-brand/70 animate-bounce" style={{ animationDelay: '300ms' }} /></span>
+              </div>
+            </div>
+          )}
+        </div>
+        {msgs.length <= 1 && (
+          <div className="px-6 md:px-8 pb-3 flex flex-wrap gap-2">
+            {['chat_suggest_1', 'chat_suggest_2', 'chat_suggest_3'].map(k => <button key={k} onClick={() => send(t(k))} className="text-[12.5px] text-ink-2 bg-paper-2 border border-line rounded-full px-3 py-1.5 hover:bg-white hover:border-teal-brand hover:text-teal-brand transition-colors">{t(k)}</button>)}
+          </div>
+        )}
+        <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="border-t border-line p-3 flex items-center gap-2 bg-white">
+          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={t('chat_placeholder')} className="flex-1 bg-paper-2 rounded-full px-5 py-3 text-[14px] focus:outline-none focus:ring-2 focus:ring-teal-200b" />
+          <Button type="submit" disabled={!input.trim()}>{t('chat_send')} <Icon name="send" className="w-4 h-4" /></Button>
+        </form>
+      </div>
+      <div className="mt-4 text-center text-[11.5px] text-ink-3 font-mono">{t('chat_disclaimer')}</div>
+    </main>
+  );
+}
+
+// ===== App.jsx — route switcher + shared state =====
+function App() {
+  const [lang, setLang] = React.useState(() => localStorage.getItem('tx_lang') || 'en');
+  const [page, setPage] = React.useState('landing');
+  const [mode, setMode] = React.useState(null);
+  const [extracted, setExtracted] = React.useState(null);
+  const [answers, setAnswers] = React.useState({});
+  const [result, setResult] = React.useState(null); // { calc, actions }
+  const t = useI18n(lang);
+
+  React.useEffect(() => { localStorage.setItem('tx_lang', lang); }, [lang]);
+
+  const order = ['landing', 'mode', 'upload', 'wizard', 'calculating', 'results', 'action', 'chat'];
+  const visibleOrder = ['landing', 'mode', 'upload', 'wizard', 'results', 'action', 'chat'];
+  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  const pageIndex = visibleOrder.indexOf(page === 'calculating' ? 'wizard' : page);
+
+  const back = () => { const i = visibleOrder.indexOf(page); if (i > 0) go(visibleOrder[i - 1]); };
+  const restart = () => { setPage('landing'); setMode(null); setExtracted(null); setAnswers({}); setResult(null); };
+
+  const compute = (ans) => {
+    setAnswers(ans); go('calculating');
+    API.post('/api/calculate', { mode, extracted, answers: ans })
+      .then((data) => { setResult(data); go('results'); })
+      .catch(() => { go('results'); });
+  };
+
+  return (
+    <div className="min-h-screen">
+      <Navbar lang={lang} onLang={setLang} mode={mode} onMode={() => go('mode')} canBack={pageIndex > 0 && page !== 'calculating'} onBack={back} onRestart={restart} t={t} step={pageIndex} totalSteps={7} />
+
+      {page === 'landing' && <PageLanding t={t} onStart={() => go('mode')} />}
+      {page === 'mode' && <PageMode t={t} lang={lang} onPick={(m) => { setMode(m); go('upload'); }} />}
+      {page === 'upload' && mode && <PageUpload t={t} lang={lang} mode={mode} onDone={(f) => { setExtracted(f); go('wizard'); }} />}
+      {page === 'upload' && !mode && (() => { go('mode'); return null; })()}
+      {page === 'wizard' && <PageWizard t={t} onDone={compute} />}
+      {page === 'calculating' && <PageCalculating t={t} />}
+      {page === 'results' && result && <PageResults t={t} lang={lang} calc={result.calc} onNext={() => go('action')} />}
+      {page === 'results' && !result && (() => { go('mode'); return null; })()}
+      {page === 'action' && result && <PageAction t={t} lang={lang} actions={result.actions} onNext={() => go('chat')} />}
+      {page === 'chat' && <PageChat t={t} lang={lang} />}
+
+      <footer className="border-t border-line bg-paper-2/50">
+        <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5"><Logo className="w-6 h-6 opacity-70" /><div className="text-[12.5px] text-ink-3 font-mono">Taxation · YA 2025 demo · not legal advice</div></div>
+          <div className="flex items-center gap-3 text-[12px] text-ink-3 font-mono"><span>Bands: ITA 1967 Sch. 1</span><span>·</span><span>Reliefs: YA 2025</span><span>·</span><span>Flask backend</span></div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
