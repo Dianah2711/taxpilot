@@ -434,7 +434,7 @@ function PageMode({ t, lang, onPick }) {
   return (
     <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
       <div className="max-w-2xl">
-        <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 01 / 07</div>
+        <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 02 / 07</div>
         <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('mode_title')}</h1>
         <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t('mode_sub')}</p>
       </div>
@@ -489,7 +489,7 @@ function PageUpload({ t, lang, mode, onDone }) {
   return (
     <main className="max-w-[1000px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
       <div className="max-w-2xl">
-        <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 02 / 07</div>
+        <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 03 / 07</div>
         <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('upload_title')}</h1>
         <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t(subKey)}</p>
       </div>
@@ -595,7 +595,7 @@ function PageWizard({ t, onDone }) {
     <main className="max-w-[900px] mx-auto px-5 md:px-8 pt-14 pb-24">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 03 / 07</div>
+          <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 04 / 07</div>
           <h1 className="mt-2 font-display text-4xl md:text-5xl tracking-tight">{t('wiz_title')}</h1>
           <p className="mt-2 text-[15px] text-ink-2">{t('wiz_sub')}</p>
         </div>
@@ -673,7 +673,8 @@ function PageResults({ t, lang, calc, onNext }) {
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(1200px 400px at 10% 0%, oklch(0.88 0.07 195 / 0.55), transparent 60%)' }} />
         <div className="relative p-8 md:p-12 grid lg:grid-cols-[1.3fr_1fr] gap-10 items-end">
           <div>
-            <div className="text-[11.5px] uppercase tracking-[0.18em] text-ink-3 font-mono">{t('res_eyebrow')}</div>
+            <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 05 / 07</div>
+            <div className="text-[11.5px] uppercase tracking-[0.18em] text-ink-3 font-mono mt-3">{t('res_eyebrow')}</div>
             <div className="mt-3 text-[17px] text-ink-2">{t('res_you_save')}</div>
             <div className="mt-2 font-display text-[88px] md:text-[128px] leading-[0.95] tracking-[-0.04em] text-teal-brand tabular">{fmtRM(savingsVal)}</div>
             <div className="mt-3 text-[14px] text-ink-3 max-w-lg leading-snug">{t('res_vs_default')}</div>
@@ -758,7 +759,7 @@ function PageAction({ t, lang, actions, onNext }) {
     <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
         <div className="max-w-2xl">
-          <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 05 / 07</div>
+          <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 06 / 07</div>
           <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('act_title')}</h1>
           <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t('act_sub')}</p>
         </div>
@@ -825,7 +826,7 @@ function PageChat({ t, lang }) {
   return (
     <main className="max-w-[900px] mx-auto px-5 md:px-8 pt-14 pb-24 slide-in">
       <div className="flex items-end justify-between mb-6">
-        <div><div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 06 / 07</div><h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('chat_title')}</h1><p className="mt-3 text-[15.5px] text-ink-2">{t('chat_sub')}</p></div>
+        <div><div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 07 / 07</div><h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('chat_title')}</h1><p className="mt-3 text-[15.5px] text-ink-2">{t('chat_sub')}</p></div>
       </div>
       <div className="rounded-3xl border border-line bg-white overflow-hidden flex flex-col h-[640px]">
         <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-area p-6 md:p-8 space-y-5">
