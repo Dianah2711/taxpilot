@@ -932,13 +932,6 @@ function App() {
       {page === 'results' && !result && (() => { go('mode'); return null; })()}
       {page === 'action' && result && <PageAction t={t} lang={lang} actions={result.actions} onNext={() => go('chat')} />}
       {page === 'chat' && <PageChat t={t} lang={lang} />}
-
-      <footer className="border-t border-line bg-paper-2/50">
-        <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5"><Logo className="w-6 h-6 opacity-70" /><div className="text-[12.5px] text-ink-3 font-mono">TaxPilot · YA 2025 demo · not legal advice</div></div>
-          <div className="flex items-center gap-3 text-[12px] text-ink-3 font-mono"><span>Bands: ITA 1967 Sch. 1</span><span>·</span><span>Reliefs: YA 2025</span><span>·</span><span>Flask backend</span></div>
-        </div>
-      </footer>
     </div>
   );
 }
