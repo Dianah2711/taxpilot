@@ -788,7 +788,7 @@ function PageAction({ t, lang, actions, onNext }) {
         <div className="max-w-2xl">
           <div className="text-[11.5px] uppercase tracking-[0.15em] text-ink-3 font-mono">Step 06 / 07</div>
           <h1 className="mt-3 font-display text-5xl md:text-6xl tracking-tight leading-[1.05]">{t('act_title')}</h1>
-          <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t('act_sub')}</p>
+          <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{actions.length === 1 ? 'One move that still shifts this year\'s bill. Ranked by ringgit-for-ringgit efficiency.' : actions.length === 2 ? 'Two moves that still shift this year\'s bill. Ranked by ringgit-for-ringgit efficiency.' : 'Three moves that still shift this year\'s bill. Ranked by ringgit-for-ringgit efficiency.'}</p>
         </div>
         <div className="rounded-2xl border border-line bg-white p-5 min-w-[260px]">
           <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{actions.length === 1 ? 'If you do this' : actions.length === 2 ? 'If you do both' : 'If you do all three'}</div>
