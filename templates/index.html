@@ -791,7 +791,7 @@ function PageAction({ t, lang, actions, onNext }) {
           <p className="mt-4 text-[16.5px] text-ink-2 leading-relaxed">{t('act_sub')}</p>
         </div>
         <div className="rounded-2xl border border-line bg-white p-5 min-w-[260px]">
-          <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">If you do all three</div>
+          <div className="text-[11.5px] uppercase tracking-[0.12em] text-ink-3 font-mono">{actions.length === 1 ? 'If you do this' : actions.length === 2 ? 'If you do both' : 'If you do all three'}</div>
           <div className="mt-2 flex items-baseline gap-2"><span className="text-ink-3 text-[14px]">spend</span><span className="font-display text-xl tabular tracking-tight">{fmtRM(totalSpend)}</span></div>
           <div className="mt-1 flex items-baseline gap-2"><span className="text-teal-brand text-[14px]">save</span><span className="font-display text-2xl tabular tracking-tight text-teal-brand">{fmtRM(totalSave)}</span></div>
         </div>
